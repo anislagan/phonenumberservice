@@ -26,6 +26,7 @@ public class CustomerRepository {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
     private final Map<UUID, Customer> customers;
     private final Object fileLock = new Object();
+    private long lastModifiedTime = 0;
 
     public CustomerRepository() {
         this.customers = new ConcurrentHashMap<>();
@@ -35,6 +36,7 @@ public class CustomerRepository {
     public void init() {
         createCsvIfNotExists();
         loadData();
+        updateLastModifiedTime();
     }
 
     private void createCsvIfNotExists() {
@@ -45,6 +47,35 @@ public class CustomerRepository {
                         StandardOpenOption.CREATE, StandardOpenOption.WRITE);
             } catch (IOException e) {
                 log.error("Error creating CSV file", e);
+            }
+        }
+    }
+
+    private boolean isFileModified() {
+        try {
+            long currentModifiedTime = Files.getLastModifiedTime(Paths.get(CSV_FILE)).toMillis();
+            return currentModifiedTime > lastModifiedTime;
+        } catch (IOException e) {
+            log.error("Error checking file modification time", e);
+            return true;
+        }
+    }
+
+    private void updateLastModifiedTime() {
+        try {
+            lastModifiedTime = Files.getLastModifiedTime(Paths.get(CSV_FILE)).toMillis();
+        } catch (IOException e) {
+            log.error("Error updating last modified time", e);
+        }
+    }
+
+    private void loadDataIfModified() {
+        if (isFileModified()) {
+            synchronized (fileLock) {
+                if (isFileModified()) {
+                    loadData();
+                    updateLastModifiedTime();
+                }
             }
         }
     }
@@ -60,13 +91,11 @@ public class CustomerRepository {
                         String[] parts = line.split(",");
                         if (parts.length == 3) {
                             UUID customerId = UUID.fromString(parts[0]);
-
                             Customer customer = Customer.builder()
                                     .id(customerId)
                                     .createdAt(LocalDateTime.parse(parts[1], DATE_FORMATTER))
                                     .updatedAt(LocalDateTime.parse(parts[2], DATE_FORMATTER))
                                     .build();
-
                             customers.put(customerId, customer);
                         }
                     });
@@ -89,9 +118,7 @@ public class CustomerRepository {
             for (int i = 1; i < lines.size(); i++) {
                 String[] columns = lines.get(i).split(",");
                 if (columns.length > 0 && columns[0].equals(customer.getId().toString())) {
-                    // Update the existing record and mark as found
-                    String updatedRecord = convertToCSV(customer);
-                    lines.set(i, updatedRecord);
+                    lines.set(i, convertToCSV(customer));
                     found = true;
                     break;
                 }
@@ -99,7 +126,6 @@ public class CustomerRepository {
         }
 
         if (!found) {
-            // Add new record if not found
             lines.add(convertToCSV(customer));
         }
 
@@ -124,11 +150,11 @@ public class CustomerRepository {
     }
 
     public boolean existsById(UUID customerId) {
-        loadData();
+        loadDataIfModified();
         return customers.containsKey(customerId);
     }
 
-    public void save(Customer customer)  {
+    public void save(Customer customer) {
         try {
             synchronized (fileLock) {
                 saveData(customer);
@@ -138,4 +164,3 @@ public class CustomerRepository {
         }
     }
 }
-

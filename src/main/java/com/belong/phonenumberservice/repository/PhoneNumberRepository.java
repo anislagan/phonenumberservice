@@ -23,6 +23,7 @@ public class PhoneNumberRepository {
     private final Map<UUID, PhoneNumber> phoneNumbers;
     private final Object fileLock = new Object();
     private long currentRowId = 0;
+    private long lastModifiedTime = 0;
 
     public PhoneNumberRepository() {
         this.phoneNumbers = new ConcurrentHashMap<>();
@@ -42,6 +43,31 @@ public class PhoneNumberRepository {
                         StandardOpenOption.CREATE, StandardOpenOption.WRITE);
             } catch (IOException e) {
                 log.error("Error creating CSV file", e);
+            }
+        }
+    }
+
+    private boolean isFileModified() {
+        try {
+            long currentModifiedTime = Files.getLastModifiedTime(Paths.get(CSV_FILE)).toMillis();
+            return currentModifiedTime > lastModifiedTime;
+        } catch (IOException e) {
+            log.error("Error checking file modification time", e);
+            return true;
+        }
+    }
+
+    private void loadDataIfModified() {
+        if (isFileModified()) {
+            synchronized (fileLock) {
+                if (isFileModified()) {  // Double-check after acquiring lock
+                    loadData();
+                    try {
+                        lastModifiedTime = Files.getLastModifiedTime(Paths.get(CSV_FILE)).toMillis();
+                    } catch (IOException e) {
+                        log.error("Error updating last modified time", e);
+                    }
+                }
             }
         }
     }
@@ -130,7 +156,7 @@ public class PhoneNumberRepository {
     }
 
     public List<PhoneNumber> findAll(PhoneNumberStatusDto status, int page, int limit) {
-        loadData();
+        loadDataIfModified();
         return phoneNumbers.values().stream()
                 .filter(number -> status == null || number.getStatus() == status)
                 .skip((long) (page - 1) * limit)
@@ -139,14 +165,14 @@ public class PhoneNumberRepository {
     }
 
     public long countAll(PhoneNumberStatusDto status) {
-        loadData();
+        loadDataIfModified();
         return phoneNumbers.values().stream()
                 .filter(number -> status == null || number.getStatus() == status)
                 .count();
     }
 
     public List<PhoneNumber> findByCustomerId(UUID customerId, PhoneNumberStatusDto status) {
-        loadData();
+        loadDataIfModified();
         return phoneNumbers.values().stream()
                 .filter(number -> number.getCustomerId().equals(customerId))
                 .filter(number -> status == null || number.getStatus() == status)
@@ -154,7 +180,7 @@ public class PhoneNumberRepository {
     }
 
     public Optional<PhoneNumber> findById(UUID id) {
-        loadData();
+        loadDataIfModified();
         return Optional.ofNullable(phoneNumbers.get(id));
     }
 
