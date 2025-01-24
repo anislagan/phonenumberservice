@@ -6,20 +6,6 @@ spring:
   profiles:
     active: dev
 
-  # Future Code Extension - db as search service
-  #datasource:
-  #  url: ${DB_URL}
-  #  username: ${DB_USERNAME}
-  #  password: ${DB_PASSWORD}
-
-search:
-  type: flatfile
-
-app:
-  storage:
-    directory: ./data
-    filename: phone_numbers.csv
-
 server:
   port: 8080
   servlet:

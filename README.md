@@ -12,9 +12,6 @@ A flexible and scalable Spring Boot application that implements a phone search m
 - Global error handling
 - Integration and unit tests with Mockito
 - Swagger API documentation
-- Extensible options - alternative search implementations for extensibility
-- Flat file search (Default)
-- Skeleton only: Database search integration
 
 ## Limitation
 - There is performance issue on the frequent loading of flat file during phone and customer search. 
@@ -32,7 +29,6 @@ Search performance in production can be vastly improved using production-grade s
 - Gradle/Maven build tools
 - JUnit 5 & Mockito for testing
 - Testcontainers for integration testing
-- Optional extension: - JPA, Postgres
 
 ## Flat File Repo
 ### Syntax
@@ -43,8 +39,6 @@ The file is in comma-separated format for easy migration to DB and other fast se
 ## Prerequisites
 - JDK 17 or later
 - Gradle 8.x
-- PostgreSQL 14+(optional)
-
 
 ## Getting Started
 
