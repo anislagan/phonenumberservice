@@ -37,7 +37,8 @@ Search performance in production can be vastly improved using production-grade s
 ## Flat File Repo
 ### Syntax
 The file is in comma-separated format for easy migration to DB and other fast search technologies e.g. elasticsearch
-- row id, phone id, customer id, phone number, activation status, creation date, modified date
+- row id, phone id, customer id, phone number, activation status, creation date, modified date - phone numbers
+- customer_id,created_date,modified_date - customer table
 
 ## Prerequisites
 - JDK 17 or later

@@ -160,7 +160,9 @@ public class PhoneNumberRepository {
 
     public PhoneNumber save(PhoneNumber phoneNumber) {
         try {
-            saveData(phoneNumber);
+            synchronized (fileLock) {
+                saveData(phoneNumber);
+            }
         } catch (IOException e) {
             log.error("Error saving phone number to CSV", e);
         }

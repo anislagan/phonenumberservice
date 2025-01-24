@@ -130,7 +130,9 @@ public class CustomerRepository {
 
     public void save(Customer customer)  {
         try {
-            saveData(customer);
+            synchronized (fileLock) {
+                saveData(customer);
+            }
         } catch (IOException ex) {
             log.error("Error saving customer to CSV", ex);
         }
