@@ -1,7 +1,6 @@
 package com.belong.phonenumberservice.mapper;
 
 import com.belong.phonenumberservice.dto.PhoneNumberDto;
-import com.belong.phonenumberservice.dto.PhoneNumberResponseDto;
 import com.belong.phonenumberservice.model.PhoneNumber;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +13,8 @@ public class PhoneNumberMapper {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
 
-    public PhoneNumberResponseDto toDto(PhoneNumber phoneNumber) {
-        PhoneNumberResponseDto dto = new PhoneNumberResponseDto();
+    public static PhoneNumberDto toDto(PhoneNumber phoneNumber) {
+        PhoneNumberDto dto = new PhoneNumberDto();
         dto.setId(phoneNumber.getId().toString());
         dto.setNumber(phoneNumber.getNumber());
         dto.setCustomerId(phoneNumber.getCustomerId().toString());
@@ -25,15 +24,9 @@ public class PhoneNumberMapper {
         return dto;
     }
 
-    public List<PhoneNumberResponseDto> toDtoList(List<PhoneNumber> phoneNumbers) {
+    public static List<PhoneNumberDto> toDtoList(List<PhoneNumber> phoneNumbers) {
         return phoneNumbers.stream()
-                .map(this::toDto)
+                .map(PhoneNumberMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    public PhoneNumber toEntity(PhoneNumberDto dto) {
-        return PhoneNumber.builder()
-                .number(dto.getNumber())
-                .build();
     }
 }

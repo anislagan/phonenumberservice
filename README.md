@@ -5,16 +5,16 @@ A flexible and scalable Spring Boot application that implements a phone search m
 ## Features
 
 - RESTful API endpoints
-- Caching for faster repeated access
 - Comprehensive error handling
 - Environment-specific configurations
 - Paginated response
 - Global error handling
+- Caching for faster repeated access
 - Integration and unit tests with Mockito
 - Swagger API documentation
 
 ## Limitation
-- There is performance issue on the frequent loading of flat file during phone and customer search. 
+- There is performance issue on the loading of flat file during phone and customer search. 
 However, since no production environment is configured to use flat file as persistence, no extra effort is made to optimise it.
 Search performance in production can be vastly improved using production-grade search technologies e.g. database or elasticsearch
 
@@ -79,16 +79,6 @@ POST /phone-numbers/{phoneNumberId}/activate  - Activate phone number
 ./gradlew test
 ```
 
-### Run integration tests
-```bash
-./gradlew integrationTest
-```
-
-### Test coverage report
-```bash
-./gradlew jacocoTestReport
-```
-
 ## Project Structure
 ```bash
 product-service/
@@ -100,6 +90,7 @@ product-service/
 │   │   │       ├── service/
 │   │   │       ├── repository/
 │   │   │       ├── model/
+│   │   │       ├── mapper/
 │   │   │       ├── dto/
 │   │   │       └── exception/
 │   │   └── resources/
@@ -110,5 +101,4 @@ product-service/
 └── build.gradle
 ```
 
-## License
-This project is licensed under the MIT License
+

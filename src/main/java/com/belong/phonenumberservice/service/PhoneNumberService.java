@@ -1,6 +1,6 @@
 package com.belong.phonenumberservice.service;
 
-import com.belong.phonenumberservice.dto.PhoneNumberResponseDto;
+import com.belong.phonenumberservice.dto.PhoneNumberDto;
 import com.belong.phonenumberservice.exception.CustomerNotFoundException;
 import com.belong.phonenumberservice.exception.InvalidActivationCodeException;
 import com.belong.phonenumberservice.exception.PhoneNumberAlreadyActivatedException;
@@ -33,12 +33,12 @@ public class PhoneNumberService {
     private final CustomerRepository customerRepository;
 
     @Cacheable(cacheNames = "phoneNumbers", key = "'all_' + #status + '_' + #page + '_' + #limit")
-    public ApiResponseDto<List<PhoneNumber>> getAllPhoneNumbers(PhoneNumberStatusDto status, int page, int limit) {
+    public ApiResponseDto<List<PhoneNumberDto>> getAllPhoneNumbers(PhoneNumberStatusDto status, int page, int limit) {
         List<PhoneNumber> numbers = repository.findAll(status, page, limit);
         long total = repository.countAll(status);
 
-        return ApiResponseDto.<List<PhoneNumber>>builder()
-                .data(numbers)
+        return ApiResponseDto.<List<PhoneNumberDto>>builder()
+                .data(PhoneNumberMapper.toDtoList(numbers))
                 .pagination(PaginationInfoDto.builder()
                         .currentPage(page)
                         .itemsPerPage(limit)
@@ -49,18 +49,19 @@ public class PhoneNumberService {
     }
 
     @Cacheable(cacheNames = "customerPhoneNumbers", key = "#customerId + '_' + #status")
-    public List<PhoneNumber> getCustomerPhoneNumbers(UUID customerId, PhoneNumberStatusDto status) {
+    public List<PhoneNumberDto> getCustomerPhoneNumbers(UUID customerId, PhoneNumberStatusDto status) {
         boolean exists = customerRepository.existsById(customerId);
         if (!exists) {
             throw new CustomerNotFoundException("Customer not found");
         }
 
-        return repository.findByCustomerId(customerId, status);
+        List<PhoneNumber> numbers = repository.findByCustomerId(customerId, status);
+        return PhoneNumberMapper.toDtoList(numbers);
     }
 
     @CacheEvict(value = "phoneNumbers", allEntries = true)
     @CachePut(value = "phoneNumbers", key = "#result.id")
-    public PhoneNumberResponseDto activatePhoneNumber(UUID phoneNumberId, String activationCode) {
+    public PhoneNumberDto activatePhoneNumber(UUID phoneNumberId, String activationCode) {
         PhoneNumber phoneNumber = repository.findById(phoneNumberId)
                 .orElseThrow(() -> new PhoneNumberNotFoundException("Phone number not found"));
 

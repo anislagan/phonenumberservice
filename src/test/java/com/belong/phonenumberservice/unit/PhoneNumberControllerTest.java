@@ -1,12 +1,9 @@
 package com.belong.phonenumberservice.unit;
 
 import com.belong.phonenumberservice.controller.PhoneNumberController;
-import com.belong.phonenumberservice.dto.ActivationRequestDto;
+import com.belong.phonenumberservice.dto.*;
 import com.belong.phonenumberservice.mapper.PhoneNumberMapper;
-import com.belong.phonenumberservice.dto.ApiResponseDto;
-import com.belong.phonenumberservice.dto.PaginationInfoDto;
 import com.belong.phonenumberservice.model.PhoneNumber;
-import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
 import com.belong.phonenumberservice.service.PhoneNumberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,8 +64,8 @@ class PhoneNumberControllerTest {
     @WithMockUser
     void getAllPhoneNumbers_ShouldReturnPhoneNumbers() throws Exception {
         // Arrange
-        var response = ApiResponseDto.<List<PhoneNumber>>builder()
-                .data(Arrays.asList(testPhoneNumber))
+        var response = ApiResponseDto.<List<PhoneNumberDto>>builder()
+                .data(PhoneNumberMapper.toDtoList(Arrays.asList(testPhoneNumber)))
                 .pagination(PaginationInfoDto.builder()
                         .currentPage(1)
                         .totalPages(1)
@@ -92,7 +89,7 @@ class PhoneNumberControllerTest {
     void getCustomerPhoneNumbers_ShouldReturnCustomerNumbers() throws Exception {
         // Arrange
         when(phoneNumberService.getCustomerPhoneNumbers(testCustomerId, null))
-                .thenReturn(Arrays.asList(testPhoneNumber));
+                .thenReturn(PhoneNumberMapper.toDtoList(Arrays.asList(testPhoneNumber)));
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/customers/{customerId}/phone-numbers", testCustomerId)
@@ -109,7 +106,7 @@ class PhoneNumberControllerTest {
         requestDto.setActivationCode("123456");
 
         when(phoneNumberService.activatePhoneNumber(testId, "123456"))
-                .thenReturn(new PhoneNumberMapper().toDto(testPhoneNumber));
+                .thenReturn(PhoneNumberMapper.toDto(testPhoneNumber));
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/phone-numbers/{phoneNumberId}/activate", testId)

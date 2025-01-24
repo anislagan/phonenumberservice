@@ -1,6 +1,6 @@
 package com.belong.phonenumberservice.unit;
 
-import com.belong.phonenumberservice.dto.PhoneNumberResponseDto;
+import com.belong.phonenumberservice.dto.PhoneNumberDto;
 import com.belong.phonenumberservice.exception.PhoneNumberNotFoundException;
 import com.belong.phonenumberservice.model.PhoneNumber;
 import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
@@ -79,12 +79,12 @@ public class PhoneNumberServiceTest {
         when(customerRepository.existsById(testCustomerId)).thenReturn(true);
 
         // Act
-        List<PhoneNumber> result = phoneNumberService.getCustomerPhoneNumbers(testCustomerId, null);
+        List<PhoneNumberDto> result = phoneNumberService.getCustomerPhoneNumbers(testCustomerId, null);
 
         // Assert
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(testCustomerId, result.get(0).getCustomerId());
+        assertEquals(testCustomerId.toString(), result.getFirst().getCustomerId());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class PhoneNumberServiceTest {
         when(phoneNumberRepository.save(any())).thenReturn(testPhoneNumber);
 
         // Act
-        PhoneNumberResponseDto result = phoneNumberService.activatePhoneNumber(testId, "123456");
+        PhoneNumberDto result = phoneNumberService.activatePhoneNumber(testId, "123456");
 
         // Assert
         assertEquals(PhoneNumberStatusDto.ACTIVE.name(), result.getStatus());
