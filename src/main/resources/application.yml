@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: phonenumberservice
+  cache:
+    type: simple
+  profiles:
+    active: dev
+
+  # Future Code Extension - db as search service
+  #datasource:
+  #  url: ${DB_URL}
+  #  username: ${DB_USERNAME}
+  #  password: ${DB_PASSWORD}
+
+search:
+  type: flatfile
+
+app:
+  storage:
+    directory: ./data
+    filename: phone_numbers.csv
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+logging:
+  level:
+    root: INFO
+    com.example.phonenumberservice: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+  endpoint:
+    health:
+      show-details: always

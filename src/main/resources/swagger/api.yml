@@ -1,0 +1,282 @@
+openapi: 3.0.3
+info:
+  title: Phone Number Management API
+  description: API for managing phone numbers and their activation status
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    description: Staging server
+
+paths:
+  /phone-numbers:
+    get:
+      summary: Get all phone numbers
+      description: Retrieve a list of all phone numbers with their details and status
+      operationId: getAllPhoneNumbers
+      parameters:
+        - name: status
+          in: query
+          description: Filter phone numbers by activation status
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, pending]
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Successfully retrieved phone numbers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhoneNumber'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /customers/{customerId}/phone-numbers:
+    get:
+      summary: Get customer's phone numbers
+      description: Retrieve all phone numbers associated with a specific customer
+      operationId: getCustomerPhoneNumbers
+      parameters:
+        - name: customerId
+          in: path
+          description: Unique identifier of the customer
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: Filter phone numbers by activation status
+          required: false
+          schema:
+            type: string
+            enum: [active, inactive, pending]
+      responses:
+        '200':
+          description: Successfully retrieved customer's phone numbers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhoneNumber'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /phone-numbers/{phoneNumberId}/activate:
+    post:
+      summary: Activate a phone number
+      description: Activate a specific phone number
+      operationId: activatePhoneNumber
+      parameters:
+        - name: phoneNumberId
+          in: path
+          description: Unique identifier of the phone number
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                activationCode:
+                  type: string
+                  description: Verification code required for activation
+                  pattern: '^[0-9]{6}$'
+              required:
+                - activationCode
+      responses:
+        '200':
+          description: Phone number successfully activated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PhoneNumber'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Phone number not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Phone number already activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Invalid activation code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    PhoneNumber:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: string
+          pattern: '^\+[1-9]\d{1,14}$'
+          example: '+12025550123'
+        customerId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [active, inactive, pending]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - number
+        - customerId
+        - status
+        - createdAt
+        - updatedAt
+
+    PaginationInfo:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          minimum: 1
+        totalPages:
+          type: integer
+          minimum: 1
+        totalItems:
+          type: integer
+          minimum: 0
+        itemsPerPage:
+          type: integer
+          minimum: 1
+      required:
+        - currentPage
+        - totalPages
+        - totalItems
+        - itemsPerPage
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+      required:
+        - code
+        - message
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Forbidden request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  #Security is excluded to highlight only the functional implementation of the phone search REST service
+  #securitySchemes:
+  #  BearerAuth:
+  #    type: http
+  #    scheme: bearer
+  #    bearerFormat: JWT
+
+#security:
+#  - BearerAuth: []
