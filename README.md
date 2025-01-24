@@ -26,7 +26,7 @@ Search performance in production can be vastly improved using production-grade s
 
 - Java 17
 - Spring Boot 3.4.1
-- Gradle/Maven build tools
+- Gradle build tools
 - JUnit 5 & Mockito for testing
 - Testcontainers for integration testing
 
@@ -45,7 +45,7 @@ The file is in comma-separated format for easy migration to DB and other fast se
 ### Clone the repository
 ```bash
 git clone https://github.com/anislagan/phone.git
-cd product-service
+cd phonenumberservice
 ```
 
 ### Build the application
