@@ -1,6 +1,6 @@
 package com.belong.phonenumberservice.exception;
 
-import com.belong.phonenumberservice.model.ErrorResponse;
+import com.belong.phonenumberservice.dto.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,8 +16,8 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(PhoneNumberNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePhoneNumberNotFound(PhoneNumberNotFoundException ex) {
-        ErrorResponse error = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponseDto> handlePhoneNumberNotFound(PhoneNumberNotFoundException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
                 .code("PHONE_NUMBER_NOT_FOUND")
                 .message(ex.getMessage())
                 .build();
@@ -25,8 +25,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCustomerNotFound(CustomerNotFoundException ex) {
-        ErrorResponse error = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponseDto> handleCustomerNotFound(CustomerNotFoundException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
                 .code("CUSTOMER_NOT_FOUND")
                 .message(ex.getMessage())
                 .build();
@@ -34,8 +34,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidActivationCodeException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidActivationCode(InvalidActivationCodeException ex) {
-        ErrorResponse error = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponseDto> handleInvalidActivationCode(InvalidActivationCodeException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
                 .code("INVALID_ACTIVATION_CODE")
                 .message(ex.getMessage())
                 .build();
@@ -43,8 +43,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PhoneNumberAlreadyActivatedException.class)
-    public ResponseEntity<ErrorResponse> handlePhoneNumberAlreadyActivated(PhoneNumberAlreadyActivatedException ex) {
-        ErrorResponse error = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponseDto> handlePhoneNumberAlreadyActivated(PhoneNumberAlreadyActivatedException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
                 .code("PHONE_NUMBER_ALREADY_ACTIVATED")
                 .message(ex.getMessage())
                 .build();
@@ -52,13 +52,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
 
-        ErrorResponse error = ErrorResponse.builder()
+        ErrorResponseDto error = ErrorResponseDto.builder()
                 .code("VALIDATION_FAILED")
                 .message("Invalid request parameters")
                 .details(errors)
@@ -67,8 +67,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<ErrorResponse> handleIOException(IOException ex) {
-        ErrorResponse error = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponseDto> handleIOException(IOException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
                 .code("INTERNAL_SERVER_ERROR")
                 .message("An unexpected error occurred")
                 .build();
@@ -76,8 +76,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        ErrorResponse error = ErrorResponse.builder()
+    public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
                 .code("INTERNAL_SERVER_ERROR")
                 .message("An unexpected error occurred")
                 .build();

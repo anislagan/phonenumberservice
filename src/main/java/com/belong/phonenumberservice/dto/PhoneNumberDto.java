@@ -1,12 +1,7 @@
 package com.belong.phonenumberservice.dto;
 
-import com.belong.phonenumberservice.model.PhoneNumberStatus;
 import lombok.Data;
-
 import jakarta.validation.constraints.Pattern;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 public class PhoneNumberDto {

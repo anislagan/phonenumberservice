@@ -1,7 +1,7 @@
 package com.belong.phonenumberservice.repository;
 
 import com.belong.phonenumberservice.model.PhoneNumber;
-import com.belong.phonenumberservice.model.PhoneNumberStatus;
+import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -63,7 +63,7 @@ public class PhoneNumberRepository {
                                     .id(UUID.fromString(parts[1]))
                                     .customerId(UUID.fromString(parts[2]))
                                     .number(parts[3])
-                                    .status(PhoneNumberStatus.valueOf(parts[4]))
+                                    .status(PhoneNumberStatusDto.valueOf(parts[4]))
                                     .createdAt(LocalDateTime.parse(parts[5], DATE_FORMATTER))
                                     .updatedAt(LocalDateTime.parse(parts[6], DATE_FORMATTER))
                                     .build();
@@ -129,7 +129,7 @@ public class PhoneNumberRepository {
         );
     }
 
-    public List<PhoneNumber> findAll(PhoneNumberStatus status, int page, int limit) {
+    public List<PhoneNumber> findAll(PhoneNumberStatusDto status, int page, int limit) {
         loadData();
         return phoneNumbers.values().stream()
                 .filter(number -> status == null || number.getStatus() == status)
@@ -138,14 +138,14 @@ public class PhoneNumberRepository {
                 .collect(Collectors.toList());
     }
 
-    public long countAll(PhoneNumberStatus status) {
+    public long countAll(PhoneNumberStatusDto status) {
         loadData();
         return phoneNumbers.values().stream()
                 .filter(number -> status == null || number.getStatus() == status)
                 .count();
     }
 
-    public List<PhoneNumber> findByCustomerId(UUID customerId, PhoneNumberStatus status) {
+    public List<PhoneNumber> findByCustomerId(UUID customerId, PhoneNumberStatusDto status) {
         loadData();
         return phoneNumbers.values().stream()
                 .filter(number -> number.getCustomerId().equals(customerId))

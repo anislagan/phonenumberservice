@@ -1,16 +1,15 @@
 package com.belong.phonenumberservice.service;
 
-import com.belong.phonenumberservice.dto.PhoneNumberDto;
 import com.belong.phonenumberservice.dto.PhoneNumberResponseDto;
 import com.belong.phonenumberservice.exception.CustomerNotFoundException;
 import com.belong.phonenumberservice.exception.InvalidActivationCodeException;
 import com.belong.phonenumberservice.exception.PhoneNumberAlreadyActivatedException;
 import com.belong.phonenumberservice.exception.PhoneNumberNotFoundException;
 import com.belong.phonenumberservice.mapper.PhoneNumberMapper;
-import com.belong.phonenumberservice.model.ApiResponse;
-import com.belong.phonenumberservice.model.PaginationInfo;
+import com.belong.phonenumberservice.dto.ApiResponseDto;
+import com.belong.phonenumberservice.dto.PaginationInfoDto;
 import com.belong.phonenumberservice.model.PhoneNumber;
-import com.belong.phonenumberservice.model.PhoneNumberStatus;
+import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
 import com.belong.phonenumberservice.repository.CustomerRepository;
 import com.belong.phonenumberservice.repository.PhoneNumberRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +33,13 @@ public class PhoneNumberService {
     private final CustomerRepository customerRepository;
 
     @Cacheable(cacheNames = "phoneNumbers", key = "'all_' + #status + '_' + #page + '_' + #limit")
-    public ApiResponse<List<PhoneNumber>> getAllPhoneNumbers(PhoneNumberStatus status, int page, int limit) {
+    public ApiResponseDto<List<PhoneNumber>> getAllPhoneNumbers(PhoneNumberStatusDto status, int page, int limit) {
         List<PhoneNumber> numbers = repository.findAll(status, page, limit);
         long total = repository.countAll(status);
 
-        return ApiResponse.<List<PhoneNumber>>builder()
+        return ApiResponseDto.<List<PhoneNumber>>builder()
                 .data(numbers)
-                .pagination(PaginationInfo.builder()
+                .pagination(PaginationInfoDto.builder()
                         .currentPage(page)
                         .itemsPerPage(limit)
                         .totalItems(total)
@@ -50,7 +49,7 @@ public class PhoneNumberService {
     }
 
     @Cacheable(cacheNames = "customerPhoneNumbers", key = "#customerId + '_' + #status")
-    public List<PhoneNumber> getCustomerPhoneNumbers(UUID customerId, PhoneNumberStatus status) {
+    public List<PhoneNumber> getCustomerPhoneNumbers(UUID customerId, PhoneNumberStatusDto status) {
         boolean exists = customerRepository.existsById(customerId);
         if (!exists) {
             throw new CustomerNotFoundException("Customer not found");
@@ -65,7 +64,7 @@ public class PhoneNumberService {
         PhoneNumber phoneNumber = repository.findById(phoneNumberId)
                 .orElseThrow(() -> new PhoneNumberNotFoundException("Phone number not found"));
 
-        if (phoneNumber.getStatus() == PhoneNumberStatus.ACTIVE) {
+        if (phoneNumber.getStatus() == PhoneNumberStatusDto.ACTIVE) {
             throw new PhoneNumberAlreadyActivatedException("Phone number is already activated");
         }
 
@@ -73,7 +72,7 @@ public class PhoneNumberService {
             throw new InvalidActivationCodeException("Invalid activation code");
         }
 
-        phoneNumber.setStatus(PhoneNumberStatus.ACTIVE);
+        phoneNumber.setStatus(PhoneNumberStatusDto.ACTIVE);
         phoneNumber.setUpdatedAt(LocalDateTime.now());
 
         return new PhoneNumberMapper().toDto(repository.save(phoneNumber));

@@ -3,7 +3,7 @@ package com.belong.phonenumberservice.unit;
 import com.belong.phonenumberservice.dto.PhoneNumberResponseDto;
 import com.belong.phonenumberservice.exception.PhoneNumberNotFoundException;
 import com.belong.phonenumberservice.model.PhoneNumber;
-import com.belong.phonenumberservice.model.PhoneNumberStatus;
+import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
 import com.belong.phonenumberservice.repository.CustomerRepository;
 import com.belong.phonenumberservice.repository.PhoneNumberRepository;
 import com.belong.phonenumberservice.service.PhoneNumberService;
@@ -48,7 +48,7 @@ public class PhoneNumberServiceTest {
                 .id(testId)
                 .number("+1234567890")
                 .customerId(testCustomerId)
-                .status(PhoneNumberStatus.PENDING)
+                .status(PhoneNumberStatusDto.PENDING)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -97,7 +97,7 @@ public class PhoneNumberServiceTest {
         PhoneNumberResponseDto result = phoneNumberService.activatePhoneNumber(testId, "123456");
 
         // Assert
-        assertEquals(PhoneNumberStatus.ACTIVE.name(), result.getStatus());
+        assertEquals(PhoneNumberStatusDto.ACTIVE.name(), result.getStatus());
         verify(phoneNumberRepository).save(any());
     }
 

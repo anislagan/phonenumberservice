@@ -3,7 +3,7 @@ package com.belong.phonenumberservice.integration;
 import com.belong.phonenumberservice.dto.ActivationRequestDto;
 import com.belong.phonenumberservice.model.Customer;
 import com.belong.phonenumberservice.model.PhoneNumber;
-import com.belong.phonenumberservice.model.PhoneNumberStatus;
+import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
 import com.belong.phonenumberservice.repository.CustomerRepository;
 import com.belong.phonenumberservice.repository.PhoneNumberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,7 +54,7 @@ public class PhoneNumberIntegrationTest {
                 .id(testId)
                 .number("+1234567890")
                 .customerId(testCustomerId)
-                .status(PhoneNumberStatus.INACTIVE)
+                .status(PhoneNumberStatusDto.INACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

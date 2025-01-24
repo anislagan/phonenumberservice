@@ -1,5 +1,6 @@
 package com.belong.phonenumberservice.model;
 
+import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
 import lombok.Data;
 import lombok.Builder;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ public class PhoneNumber {
     private UUID id;
     private String number;
     private UUID customerId;
-    private PhoneNumberStatus status;
+    private PhoneNumberStatusDto status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

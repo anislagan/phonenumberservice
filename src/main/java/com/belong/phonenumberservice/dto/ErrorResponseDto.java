@@ -1,11 +1,11 @@
-package com.belong.phonenumberservice.model;
+package com.belong.phonenumberservice.dto;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class ErrorResponse {
+public class ErrorResponseDto {
     private String code;
     private String message;
     private Object details;

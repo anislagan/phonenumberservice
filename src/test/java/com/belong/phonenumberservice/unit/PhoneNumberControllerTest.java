@@ -3,10 +3,10 @@ package com.belong.phonenumberservice.unit;
 import com.belong.phonenumberservice.controller.PhoneNumberController;
 import com.belong.phonenumberservice.dto.ActivationRequestDto;
 import com.belong.phonenumberservice.mapper.PhoneNumberMapper;
-import com.belong.phonenumberservice.model.ApiResponse;
-import com.belong.phonenumberservice.model.PaginationInfo;
+import com.belong.phonenumberservice.dto.ApiResponseDto;
+import com.belong.phonenumberservice.dto.PaginationInfoDto;
 import com.belong.phonenumberservice.model.PhoneNumber;
-import com.belong.phonenumberservice.model.PhoneNumberStatus;
+import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
 import com.belong.phonenumberservice.service.PhoneNumberService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,7 @@ class PhoneNumberControllerTest {
                 .id(testId)
                 .number("+1234567890")
                 .customerId(testCustomerId)
-                .status(PhoneNumberStatus.PENDING)
+                .status(PhoneNumberStatusDto.PENDING)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -67,9 +67,9 @@ class PhoneNumberControllerTest {
     @WithMockUser
     void getAllPhoneNumbers_ShouldReturnPhoneNumbers() throws Exception {
         // Arrange
-        var response = ApiResponse.<List<PhoneNumber>>builder()
+        var response = ApiResponseDto.<List<PhoneNumber>>builder()
                 .data(Arrays.asList(testPhoneNumber))
-                .pagination(PaginationInfo.builder()
+                .pagination(PaginationInfoDto.builder()
                         .currentPage(1)
                         .totalPages(1)
                         .totalItems(1)

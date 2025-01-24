@@ -1,11 +1,11 @@
-package com.belong.phonenumberservice.model;
+package com.belong.phonenumberservice.dto;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class PaginationInfo {
+public class PaginationInfoDto {
     private int currentPage;
     private int totalPages;
     private long totalItems;
