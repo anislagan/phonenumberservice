@@ -5,12 +5,12 @@ info:
   version: 1.0.0
   contact:
     name: API Support
-    email: support@example.com
+    email: ethanaonline [@] gmail [dot] com
 
 servers:
-  - url: https://api.example.com/v1
+  - url: https://<TBD>/v1
     description: Production server
-  - url: https://staging-api.example.com/v1
+  - url: https://<TBD>/v1
     description: Staging server
 
 paths:
