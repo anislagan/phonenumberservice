@@ -115,4 +115,48 @@ public class PhoneNumberIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @WithMockUser
+    void getCustomerPhoneNumbers_ShouldReturnMultiplePhoneNumbersForOneCustomer() throws Exception {
+        // Arrange
+        UUID customerId = UUID.randomUUID();
+        Customer customer = Customer.builder()
+                .id(customerId)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        customerRepository.save(customer);
+
+        PhoneNumber firstNumber = PhoneNumber.builder()
+                .id(UUID.randomUUID())
+                .number("+1234567890")
+                .customerId(customerId)
+                .status(PhoneNumberStatusDto.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        PhoneNumber secondNumber = PhoneNumber.builder()
+                .id(UUID.randomUUID())
+                .number("+1234567891")
+                .customerId(customerId)
+                .status(PhoneNumberStatusDto.INACTIVE)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        phoneNumberRepository.save(firstNumber);
+        phoneNumberRepository.save(secondNumber);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/customers/{customerId}/phone-numbers", customerId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[?(@.customerId == '" + customerId + "')]").exists())
+                .andExpect(jsonPath("$.data[?(@.number == '+1234567890')]").exists())
+                .andExpect(jsonPath("$.data[?(@.number == '+1234567891')]").exists());
+    }
 }
