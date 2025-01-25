@@ -31,7 +31,7 @@ public class PhoneNumberServiceTest {
     private PhoneNumberRepository phoneNumberRepository;
 
     @Mock
-    CustomerRepository  customerRepository;
+    private CustomerRepository  customerRepository;
 
     @InjectMocks
     private PhoneNumberService phoneNumberService;
@@ -94,7 +94,7 @@ public class PhoneNumberServiceTest {
         when(phoneNumberRepository.save(any())).thenReturn(testPhoneNumber);
 
         // Act
-        PhoneNumberDto result = phoneNumberService.activatePhoneNumber(testId, "123456");
+        PhoneNumberDto result = phoneNumberService.activatePhoneNumber(testId);
 
         // Assert
         assertEquals(PhoneNumberStatusDto.ACTIVE.name(), result.getStatus());
@@ -108,7 +108,7 @@ public class PhoneNumberServiceTest {
 
         // Act & Assert
         assertThrows(PhoneNumberNotFoundException.class, () ->
-                phoneNumberService.activatePhoneNumber(testId, "123456")
+                phoneNumberService.activatePhoneNumber(testId)
         );
     }
 }

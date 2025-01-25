@@ -33,15 +33,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(InvalidActivationCodeException.class)
-    public ResponseEntity<ErrorResponseDto> handleInvalidActivationCode(InvalidActivationCodeException ex) {
-        ErrorResponseDto error = ErrorResponseDto.builder()
-                .code("INVALID_ACTIVATION_CODE")
-                .message(ex.getMessage())
-                .build();
-        return new ResponseEntity<>(error, HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
     @ExceptionHandler(PhoneNumberAlreadyActivatedException.class)
     public ResponseEntity<ErrorResponseDto> handlePhoneNumberAlreadyActivated(PhoneNumberAlreadyActivatedException ex) {
         ErrorResponseDto error = ErrorResponseDto.builder()

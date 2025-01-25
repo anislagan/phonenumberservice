@@ -127,19 +127,6 @@ paths:
           schema:
             type: string
             format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                activationCode:
-                  type: string
-                  description: Verification code required for activation
-                  pattern: '^[0-9]{6}$'
-              required:
-                - activationCode
       responses:
         '200':
           description: Phone number successfully activated
@@ -164,12 +151,6 @@ paths:
                 $ref: '#/components/schemas/Error'
         '409':
           description: Phone number already activated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '422':
-          description: Invalid activation code
           content:
             application/json:
               schema:
@@ -271,12 +252,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-  #Security is excluded to highlight only the functional implementation of the phone search REST service
-  #securitySchemes:
-  #  BearerAuth:
-  #    type: http
-  #    scheme: bearer
-  #    bearerFormat: JWT
-
-#security:
-#  - BearerAuth: []

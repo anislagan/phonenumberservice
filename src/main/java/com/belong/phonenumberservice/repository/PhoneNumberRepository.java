@@ -2,14 +2,10 @@ package com.belong.phonenumberservice.repository;
 
 import com.belong.phonenumberservice.model.PhoneNumber;
 import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.io.*;
-import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -17,146 +13,53 @@ import java.util.stream.Collectors;
 @Slf4j
 @Repository
 public class PhoneNumberRepository {
-    private static final String CSV_FILE = "./data/phone_numbers.csv";
-    private static final String CSV_HEADER = "row_id,phone_id,customer_id,phone_number,activation_status,creation_date,modified_date";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
-    private final Map<UUID, PhoneNumber> phoneNumbers;
-    private final Object fileLock = new Object();
-    private long currentRowId = 0;
-    private long lastModifiedTime = 0;
+    private static final Map<UUID, PhoneNumber> phoneNumbers = new ConcurrentHashMap<>();
 
-    public PhoneNumberRepository() {
-        this.phoneNumbers = new ConcurrentHashMap<>();
-    }
+    static {
+        // Customer 1 with two phone numbers
+        UUID customer1 = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+        addPhoneNumber(
+                UUID.fromString("7ba7b810-9dad-11d1-80b4-00c04fd430c8"),
+                customer1,
+                "+61411111111",
+                PhoneNumberStatusDto.ACTIVE,
+                LocalDateTime.now().minusDays(30),
+                LocalDateTime.now().minusDays(30)
+        );
+        addPhoneNumber(
+                UUID.fromString("8ba7b810-9dad-11d1-80b4-00c04fd430c8"),
+                customer1,
+                "+61422222222",
+                PhoneNumberStatusDto.INACTIVE,
+                LocalDateTime.now().minusDays(29),
+                LocalDateTime.now().minusDays(25)
+        );
 
-    @PostConstruct
-    public void init() {
-        createCsvIfNotExists();
-        loadData();
-    }
-
-    private void createCsvIfNotExists() {
-        Path file = Paths.get(CSV_FILE);
-        if (!Files.exists(file)) {
-            try {
-                Files.write(file, Collections.singletonList(CSV_HEADER),
-                        StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-            } catch (IOException e) {
-                log.error("Error creating CSV file", e);
-            }
-        }
-    }
-
-    private boolean isFileModified() {
-        try {
-            long currentModifiedTime = Files.getLastModifiedTime(Paths.get(CSV_FILE)).toMillis();
-            return currentModifiedTime > lastModifiedTime;
-        } catch (IOException e) {
-            log.error("Error checking file modification time", e);
-            return true;
-        }
-    }
-
-    private void loadDataIfModified() {
-        if (isFileModified()) {
-            synchronized (fileLock) {
-                if (isFileModified()) {  // Double-check after acquiring lock
-                    loadData();
-                    try {
-                        lastModifiedTime = Files.getLastModifiedTime(Paths.get(CSV_FILE)).toMillis();
-                    } catch (IOException e) {
-                        log.error("Error updating last modified time", e);
-                    }
-                }
-            }
-        }
-    }
-
-    private void loadData() {
-        try {
-            List<String> lines = Files.readAllLines(Paths.get(CSV_FILE));
-            if (lines.size() <= 1) return; // Only header exists
-
-            lines.stream()
-                    .skip(1) // Skip header
-                    .forEach(line -> {
-                        String[] parts = line.split(",");
-                        if (parts.length == 7) {
-                            long rowId = Long.parseLong(parts[0]);
-                            currentRowId = Math.max(currentRowId, rowId);
-
-                            PhoneNumber phoneNumber = PhoneNumber.builder()
-                                    .id(UUID.fromString(parts[1]))
-                                    .customerId(UUID.fromString(parts[2]))
-                                    .number(parts[3])
-                                    .status(PhoneNumberStatusDto.valueOf(parts[4]))
-                                    .createdAt(LocalDateTime.parse(parts[5], DATE_FORMATTER))
-                                    .updatedAt(LocalDateTime.parse(parts[6], DATE_FORMATTER))
-                                    .build();
-
-                            phoneNumbers.put(phoneNumber.getId(), phoneNumber);
-                        }
-                    });
-        } catch (IOException e) {
-            log.error("Error loading phone numbers from CSV", e);
-        }
-    }
-
-    public void saveData(PhoneNumber phoneRecord) throws IOException {
-        File file = new File(CSV_FILE);
-        boolean isNewFile = !file.exists() || file.length() == 0;
-
-        List<String> lines = new ArrayList<>();
-        if (!isNewFile) {
-            lines = Files.readAllLines(file.toPath());
-        }
-
-        boolean found = false;
-        if (lines.size() >= 2) {
-            for (int i = 1; i < lines.size(); i++) {
-                String[] columns = lines.get(i).split(",");
-                if (columns.length > 1 && columns[1].equals(phoneRecord.getNumber())) {
-                    // Update the existing record and mark as found
-                    String updatedRecord = convertToCSV(phoneRecord);
-                    lines.set(i, updatedRecord);
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if (!found) {
-            // Add new record if not found
-            lines.add(convertToCSV(phoneRecord));
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(CSV_FILE))) {
-            if (isNewFile) {
-                writer.write(CSV_HEADER);
-                writer.newLine();
-            }
-            for (String line : lines) {
-                writer.write(line);
-                writer.newLine();
-            }
-        }
-    }
-
-    private String convertToCSV(PhoneNumber phoneNumber) {
-        currentRowId++;
-        return String.format("%d,%s,%s,%s,%s,%s,%s",
-                currentRowId,
-                phoneNumber.getId(),
-                phoneNumber.getCustomerId(),
-                phoneNumber.getNumber(),
-                phoneNumber.getStatus(),
-                phoneNumber.getCreatedAt().format(DATE_FORMATTER),
-                phoneNumber.getUpdatedAt().format(DATE_FORMATTER)
+        // Customer 2 with one phone number
+        UUID customer2 = UUID.fromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
+        addPhoneNumber(
+                UUID.fromString("9ba7b810-9dad-11d1-80b4-00c04fd430c8"),
+                customer2,
+                "+61433333333",
+                PhoneNumberStatusDto.ACTIVE,
+                LocalDateTime.now().minusDays(20),
+                LocalDateTime.now().minusDays(20)
         );
     }
 
+    private static void addPhoneNumber(UUID id, UUID customerId, String number,
+                                       PhoneNumberStatusDto status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        phoneNumbers.put(id, PhoneNumber.builder()
+                .id(id)
+                .customerId(customerId)
+                .number(number)
+                .status(status)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .build());
+    }
+
     public List<PhoneNumber> findAll(PhoneNumberStatusDto status, int page, int limit) {
-        loadDataIfModified();
         return phoneNumbers.values().stream()
                 .filter(number -> status == null || number.getStatus() == status)
                 .skip((long) (page - 1) * limit)
@@ -165,14 +68,12 @@ public class PhoneNumberRepository {
     }
 
     public long countAll(PhoneNumberStatusDto status) {
-        loadDataIfModified();
         return phoneNumbers.values().stream()
                 .filter(number -> status == null || number.getStatus() == status)
                 .count();
     }
 
     public List<PhoneNumber> findByCustomerId(UUID customerId, PhoneNumberStatusDto status) {
-        loadDataIfModified();
         return phoneNumbers.values().stream()
                 .filter(number -> number.getCustomerId().equals(customerId))
                 .filter(number -> status == null || number.getStatus() == status)
@@ -180,19 +81,11 @@ public class PhoneNumberRepository {
     }
 
     public Optional<PhoneNumber> findById(UUID id) {
-        loadDataIfModified();
         return Optional.ofNullable(phoneNumbers.get(id));
     }
 
     public PhoneNumber save(PhoneNumber phoneNumber) {
-        try {
-            synchronized (fileLock) {
-                saveData(phoneNumber);
-            }
-        } catch (IOException e) {
-            log.error("Error saving phone number to CSV", e);
-        }
-
+        phoneNumbers.put(phoneNumber.getId(), phoneNumber);
         return phoneNumber;
     }
 }

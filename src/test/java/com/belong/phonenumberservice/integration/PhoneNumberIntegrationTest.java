@@ -1,6 +1,5 @@
 package com.belong.phonenumberservice.integration;
 
-import com.belong.phonenumberservice.dto.ActivationRequestDto;
 import com.belong.phonenumberservice.model.Customer;
 import com.belong.phonenumberservice.model.PhoneNumber;
 import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
@@ -103,12 +102,8 @@ public class PhoneNumberIntegrationTest {
     @Test
     @WithMockUser
     void activatePhoneNumber_ShouldActivateNumber() throws Exception {
-        ActivationRequestDto requestDto = new ActivationRequestDto();
-        requestDto.setActivationCode("123456");
-
         mockMvc.perform(post("/api/v1/phone-numbers/{phoneNumberId}/activate", testId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("ACTIVE"));
     }
@@ -116,12 +111,8 @@ public class PhoneNumberIntegrationTest {
     @Test
     @WithMockUser
     void activatePhoneNumber_ShouldReturnNotFound_WhenPhoneNumberDoesNotExist() throws Exception {
-        ActivationRequestDto requestDto = new ActivationRequestDto();
-        requestDto.setActivationCode("123456");
-
         mockMvc.perform(post("/api/v1/phone-numbers/{phoneNumberId}/activate", UUID.randomUUID())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 }

@@ -5,7 +5,6 @@ import com.belong.phonenumberservice.dto.*;
 import com.belong.phonenumberservice.mapper.PhoneNumberMapper;
 import com.belong.phonenumberservice.model.PhoneNumber;
 import com.belong.phonenumberservice.service.PhoneNumberService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,6 @@ class PhoneNumberControllerTest {
 
     @MockitoBean
     private PhoneNumberMapper phoneNumberMapper;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private PhoneNumber testPhoneNumber;
     private UUID testId;
@@ -102,31 +98,13 @@ class PhoneNumberControllerTest {
     @WithMockUser
     void activatePhoneNumber_ShouldActivateNumber() throws Exception {
         // Arrange
-        ActivationRequestDto requestDto = new ActivationRequestDto();
-        requestDto.setActivationCode("123456");
-
-        when(phoneNumberService.activatePhoneNumber(testId, "123456"))
+        when(phoneNumberService.activatePhoneNumber(testId))
                 .thenReturn(PhoneNumberMapper.toDto(testPhoneNumber));
 
         // Act & Assert
         mockMvc.perform(post("/api/v1/phone-numbers/{phoneNumberId}/activate", testId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").exists());
-    }
-
-    @Test
-    @WithMockUser
-    void activatePhoneNumber_ShouldValidateActivationCode() throws Exception {
-        // Arrange
-        ActivationRequestDto requestDto = new ActivationRequestDto();
-        requestDto.setActivationCode("12345"); // Invalid code (less than 6 digits)
-
-        // Act & Assert
-        mockMvc.perform(post("/api/v1/phone-numbers/{phoneNumberId}/activate", testId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isBadRequest());
     }
 }

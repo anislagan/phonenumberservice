@@ -2,7 +2,6 @@ package com.belong.phonenumberservice.service;
 
 import com.belong.phonenumberservice.dto.PhoneNumberDto;
 import com.belong.phonenumberservice.exception.CustomerNotFoundException;
-import com.belong.phonenumberservice.exception.InvalidActivationCodeException;
 import com.belong.phonenumberservice.exception.PhoneNumberAlreadyActivatedException;
 import com.belong.phonenumberservice.exception.PhoneNumberNotFoundException;
 import com.belong.phonenumberservice.mapper.PhoneNumberMapper;
@@ -48,7 +47,7 @@ public class PhoneNumberService {
                 .build();
     }
 
-    @Cacheable(cacheNames = "customerPhoneNumbers", key = "#customerId + '_' + #status")
+    @Cacheable(cacheNames = "customers", key = "#customerId + '_' + #status")
     public List<PhoneNumberDto> getCustomerPhoneNumbers(UUID customerId, PhoneNumberStatusDto status) {
         boolean exists = customerRepository.existsById(customerId);
         if (!exists) {
@@ -61,7 +60,7 @@ public class PhoneNumberService {
 
     @CacheEvict(value = "phoneNumbers", allEntries = true)
     @CachePut(value = "phoneNumbers", key = "#result.id")
-    public PhoneNumberDto activatePhoneNumber(UUID phoneNumberId, String activationCode) {
+    public PhoneNumberDto activatePhoneNumber(UUID phoneNumberId) {
         PhoneNumber phoneNumber = repository.findById(phoneNumberId)
                 .orElseThrow(() -> new PhoneNumberNotFoundException("Phone number not found"));
 
@@ -69,23 +68,9 @@ public class PhoneNumberService {
             throw new PhoneNumberAlreadyActivatedException("Phone number is already activated");
         }
 
-        if (!isValidActivationCode(activationCode)) {
-            throw new InvalidActivationCodeException("Invalid activation code");
-        }
-
         phoneNumber.setStatus(PhoneNumberStatusDto.ACTIVE);
         phoneNumber.setUpdatedAt(LocalDateTime.now());
 
-        return new PhoneNumberMapper().toDto(repository.save(phoneNumber));
-    }
-
-    /**
-     * This may require external verification in actual production environment.
-     * Defaults to true
-     * @param activationCode
-     * @return
-     */
-    private boolean isValidActivationCode(String activationCode) {
-        return true;
+        return PhoneNumberMapper.toDto(repository.save(phoneNumber));
     }
 }

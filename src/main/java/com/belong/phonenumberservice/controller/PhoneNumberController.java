@@ -1,6 +1,5 @@
 package com.belong.phonenumberservice.controller;
 
-import com.belong.phonenumberservice.dto.ActivationRequestDto;
 import com.belong.phonenumberservice.dto.ApiResponseDto;
 import com.belong.phonenumberservice.dto.PhoneNumberDto;
 import com.belong.phonenumberservice.dto.PhoneNumberStatusDto;
@@ -45,10 +44,9 @@ public class PhoneNumberController {
 
     @PostMapping("/phone-numbers/{phoneNumberId}/activate")
     public ResponseEntity<ApiResponseDto<PhoneNumberDto>> activatePhoneNumber(
-            @PathVariable UUID phoneNumberId,
-            @RequestBody @Valid ActivationRequestDto request) {
+            @PathVariable UUID phoneNumberId) {
 
-        PhoneNumberDto activatedNumber = phoneNumberService.activatePhoneNumber(phoneNumberId, request.getActivationCode());
+        PhoneNumberDto activatedNumber = phoneNumberService.activatePhoneNumber(phoneNumberId);
         ApiResponseDto<PhoneNumberDto> response = ApiResponseDto.<PhoneNumberDto>builder()
                 .data(activatedNumber)
                 .build();
