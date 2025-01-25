@@ -9,14 +9,9 @@ A flexible and scalable Spring Boot application that implements a phone search m
 - Environment-specific configurations
 - Paginated response
 - Global error handling
-- Caching for faster repeated access
+- Caching for faster access
 - Integration and unit tests with Mockito
 - Swagger API documentation
-
-## Limitation
-- There is performance issue on the loading of flat file during phone and customer search. 
-However, since no production environment is configured to use flat file as persistence, no extra effort is made to optimise it.
-Search performance in production can be vastly improved using production-grade search technologies e.g. database or elasticsearch
 
 ## Unsupported features
 - Rate limiting - this is better handled by a more robust server infra e.g. AWS API Gateway
@@ -30,11 +25,9 @@ Search performance in production can be vastly improved using production-grade s
 - JUnit 5 & Mockito for testing
 - Testcontainers for integration testing
 
-## Flat File Repo
-### Syntax
-The file is in comma-separated format for easy migration to DB and other fast search technologies e.g. elasticsearch
+## Static Data fields
 - row id, phone id, customer id, phone number, activation status, creation date, modified date - phone numbers
-- customer_id,created_date,modified_date - customer table
+- customer_id,created_date,modified_date - customers
 
 ## Prerequisites
 - JDK 17 or later
